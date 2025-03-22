@@ -206,5 +206,6 @@ void List_Min(struct list* List);
 void My_Swap(struct list_elem* elem1, struct list_elem* elem2);
 void List_Swap(struct list* List);
 void List_Shuffle(struct list* List);
+void List_Print(struct list* );
 
 #endif /* list.h */

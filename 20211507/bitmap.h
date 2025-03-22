@@ -5,6 +5,28 @@
 #include <stddef.h>
 #include <inttypes.h>
 
+/* Element type.
+
+   This must be an unsigned integer type at least as wide as int.
+
+   Each bit represents one bit in the bitmap.
+   If bit 0 in an element represents bit K in the bitmap,
+   then bit 1 in the element represents bit K+1 in the bitmap,
+   and so on. */
+   typedef unsigned long elem_type;
+
+   /* Number of bits in an element. */
+   #define ELEM_BITS (sizeof (elem_type) * CHAR_BIT)
+   
+   /* From the outside, a bitmap is an array of bits.  From the
+      inside, it's an array of elem_type (defined above) that
+      simulates an array of bits. */
+   struct bitmap
+     {
+       size_t bit_cnt;     /* Number of bits. */
+       elem_type *bits;    /* Elements that represent bits. */
+     };
+
 /* Bitmap abstract data type. */
 
 /* Creation and destruction. */
@@ -42,5 +64,39 @@ size_t bitmap_file_size (const struct bitmap *);
 
 /* Debugging. */
 void bitmap_dump (const struct bitmap *);
+
+/*
+20211507 DongGeon Kim
+*/
+
+/* Bitmap size. */
+void Bitmap_Size(struct bitmap * );
+
+/* Setting and testing single bits. */
+void Bitmap_Set(struct bitmap * );
+void Bitmap_Mark(struct bitmap * );
+void Bitmap_Reset(struct bitmap * );
+void Bitmap_Flip(struct bitmap * );
+void Bitmap_Test(struct bitmap * );
+
+/* Setting and testing multiple bits. */
+void Bitmap_Set_All(struct bitmap * );
+void Bitmap_Set_Multiple(struct bitmap * );
+void Bitmap_Count(struct bitmap * );
+void Bitmap_Contains(struct bitmap * );
+void Bitmap_Any(struct bitmap * );
+void Bitmap_None(struct bitmap * );
+void Bitmap_All(struct bitmap * );
+
+/* Finding set or unset bits. */
+void Bitmap_Scan(struct bitmap * );
+void Bitmap_Scan_And_Flip(struct bitmap * );
+
+/* Debugging. */
+void Bitmap_Dump(struct bitmap * );
+void Bitmap_Print(struct bitmap * );
+
+/* Other */
+struct bitmap* Bitmap_Expand(struct bitmap *);
 
 #endif /* bitmap.h */

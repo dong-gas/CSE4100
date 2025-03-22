@@ -683,3 +683,11 @@ void List_Shuffle(struct list *List) {
     }
     return;
 }
+
+void List_Print(struct list* List) {
+    for (struct list_elem* i = list_begin(List); i != list_end(List); i = list_next(i)) {
+        printf("%d ", list_entry(i, struct list_item, elem)->data);
+    }
+    printf("\n");
+    return;
+}

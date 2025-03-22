@@ -19,7 +19,7 @@
 
 struct list List[MAX_CNT];
 struct hash Hash[MAX_CNT];
-// struct bitmap Bitmap[MAX_CNT];
+struct bitmap Bitmap[MAX_CNT];
 
 char type[MAX_CNT][NAME_LEN_MAX];
 char name[MAX_CNT][NAME_LEN_MAX];
@@ -37,17 +37,22 @@ int get_idx() {
 }
 
 void Create() {
+    // 새로 자료구조 생성하는 함수
     scanf("%s %s", type[structure_cnt], name[structure_cnt]);
     if (!strcmp(type[structure_cnt], "list")) list_init(&List[structure_cnt]);
     else if(!strcmp(type[structure_cnt], "hashtable")) hash_init(&Hash[structure_cnt], hashing_function, hash_less, NULL);
-    // else if(!strcmp(type[structure_cnt], "bitmap")) list_init(&List[sz]);
+    else if(!strcmp(type[structure_cnt], "bitmap")) {
+        int sz;
+        scanf("%d", &sz);
+        Bitmap[structure_cnt] = *bitmap_create(sz);
+    }
     structure_cnt++;
 }
 
 void Delete() {
-    for (int i = 0; i < NAME_LEN_MAX; i++) name[idx][i] = '!';  // 쓰레기 값으로 바꾸기
+    // 삭제하는 함수
+    for (int i = 0; i < NAME_LEN_MAX; i++) name[idx][i] = '!';  // 이름 쓰레기 값으로 바꾸기
 
-    // List, hash만 구현
     if (!strcmp(type[idx], "list")) {
         size_t sz = list_size(&List[idx]);
         while (sz--) {
@@ -57,17 +62,15 @@ void Delete() {
         }
     }
     else if (!strcmp(type[idx], "hashtable")) hash_destroy(&Hash[idx], Hash_Destructor);
+    else if (!strcmp(type[idx], "bitmap")) free(Bitmap[idx].bits);
+    return;
 }
 
 void Dumpdata() {
-    // List, hash만 구현
-    if (!strcmp(type[idx], "list")) {
-        for (struct list_elem* i = list_begin(&List[idx]); i != list_end(&List[idx]); i = list_next(i)) {
-            printf("%d ", list_entry(i, struct list_item, elem)->data);
-        }
-        printf("\n");
-    }
+    // 자료구조 내 데이터 출력하는 함수
+    if (!strcmp(type[idx], "list")) List_Print(&List[idx]);
     else if (!strcmp(type[idx], "hashtable")) Hash_Print(&Hash[idx]);
+    else if (!strcmp(type[idx], "bitmap")) Bitmap_Print(&Bitmap[idx]);
 }
 
 int main(void) {
@@ -143,7 +146,39 @@ int main(void) {
             // ------------- Hash End -------------
 
 
-            else break;
+            // ------------- Bitmap Start -------------
+            /* Bitmap size. */
+            else if (!strcmp(cmd, "bitmap_size")) Bitmap_Size(&Bitmap[idx]);
+
+            /* Setting and testing single bits. */
+            else if (!strcmp(cmd, "bitmap_set")) Bitmap_Set(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_mark")) Bitmap_Mark(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_reset")) Bitmap_Reset(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_flip")) Bitmap_Flip(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_test")) Bitmap_Test(&Bitmap[idx]);
+
+            /* Setting and testing multiple bits. */
+            else if (!strcmp(cmd, "bitmap_set_all")) Bitmap_Set_All(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_set_multiple")) Bitmap_Set_Multiple(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_count")) Bitmap_Count(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_contains")) Bitmap_Contains(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_any")) Bitmap_Any(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_none")) Bitmap_None(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_all")) Bitmap_All(&Bitmap[idx]);
+
+            /* Finding set or unset bits. */
+            else if (!strcmp(cmd, "bitmap_scan")) Bitmap_Scan(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_scan_and_flip")) Bitmap_Scan_And_Flip(&Bitmap[idx]);
+            
+            /* Debugging. */
+            else if (!strcmp(cmd, "bitmap_dump")) Bitmap_Dump(&Bitmap[idx]);
+
+            /* Other */
+            else if (!strcmp(cmd, "bitmap_expand")) Bitmap[idx] = *Bitmap_Expand(&Bitmap[idx]);
+            // ------------- Bitmap End -------------
+
+
+            
         }
     }
 }
