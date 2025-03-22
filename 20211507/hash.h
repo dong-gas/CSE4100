@@ -90,7 +90,11 @@ unsigned hash_int(int);
 /*
 20211507 DongGeon Kim
 */
-void hashing_function(const struct hash_elem *, void *);
+
+// 내가 만든 hash
+unsigned hash_int_2(int);
+
+unsigned hashing_function(const struct hash_elem *, void *);
 
 // hash less 비교함수
 bool hash_less(const struct hash_elem *, const struct hash_elem *, void *);

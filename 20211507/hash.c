@@ -387,16 +387,32 @@ remove_elem(struct hash *h, struct hash_elem *e) {
 }
 
 /*
-20211507 DongGeon Kim
+Below Code: 20211507 DongGeon Kim
 */
 
+/* my hash */
+unsigned hash_int_2(int i) {
+    // 라빈 카프
+    // 근데,,, 어차피 테케는 해시 방법 다르면 기존 답과 무조건 다르게 나오니까 틀리는 게 맞음.
+    const unsigned mod = 998244353, P = 1000003;
+    unsigned ret = 0, p = 1;
+    if(i < 0) i = -i;
+    while (i) {
+        ret = (ret + (i % 10) * p) % mod;
+        p = p * P % mod;
+        i /= 10;
+    }
+    return ret;
+}
+
 // hashing function
-void hashing_function(const struct hash_elem* elem, void* aux) {
+unsigned hashing_function(const struct hash_elem *elem, void *aux) {
+    // return hash_int_2(elem->data);
     return hash_int(elem->data);
 }
 
 // hash less 비교함수
-bool hash_less(const struct hash_elem* a, const struct hash_elem* b, void* aux) {
+bool hash_less(const struct hash_elem *a, const struct hash_elem *b, void *aux) {
     return a->data < b->data;
 }
 
@@ -501,12 +517,12 @@ void Hash_Empty(struct hash *Hash) {
 }
 
 void act_print(struct hash_elem *e, void *aux) {
-  // 출력용
-  printf("%d ", e->data);
-  return;
+    // 출력용
+    printf("%d ", e->data);
+    return;
 }
 
-void Hash_Print(struct hash* Hash) {
+void Hash_Print(struct hash *Hash) {
     hash_apply(Hash, act_print);
     printf("\n");
     return;

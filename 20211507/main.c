@@ -141,6 +141,9 @@ int main(void) {
             else if (!strcmp(cmd, "hash_size")) Hash_Size(&Hash[idx]);
             else if (!strcmp(cmd, "hash_empty")) Hash_Empty(&Hash[idx]);
             // ------------- Hash End -------------
+
+
+            else break;
         }
     }
 }
