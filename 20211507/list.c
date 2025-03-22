@@ -91,6 +91,7 @@ list_end(struct list *list) {
     return &list->tail;
 }
 
+
 /* Returns the LIST's reverse beginning, for iterating through
    LIST in reverse order, from back to front. */
 struct list_elem *
