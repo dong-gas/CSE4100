@@ -436,6 +436,5 @@ struct bitmap* Bitmap_Expand(struct bitmap *Bitmap) {
     scanf("%d", &sz);
     struct bitmap *new_bitmap = bitmap_create(Bitmap->bit_cnt + sz);
     for (int i = 0; i < Bitmap->bit_cnt; i++) bitmap_set(new_bitmap, i, bitmap_test(Bitmap, i));
-    bitmap_destroy(Bitmap);
     return new_bitmap;
 }

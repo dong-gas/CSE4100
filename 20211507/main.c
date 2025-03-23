@@ -74,6 +74,7 @@ void Dumpdata() {
 }
 
 int main(void) {
+    srand((unsigned int)time(NULL));
     while (1) {
         char cmd[CMD_MAX];
         scanf("%s", cmd);

@@ -671,7 +671,7 @@ void List_Swap(struct list *List) {
 
 void List_Shuffle(struct list *List) {
     // shuffle
-    int sz = list_size(List), shuffle_cnt = 10 * sz;
+    int sz = list_size(List), shuffle_cnt = 100 * sz;
     while (shuffle_cnt--) {
         int idx1 = rand() % sz, idx2 = rand() % sz;
         while (!(idx1 ^ idx2)) idx2 = rand() % sz;
