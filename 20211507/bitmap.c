@@ -387,6 +387,7 @@ void Bitmap_None(struct bitmap *Bitmap) {
     else printf("false\n");
     return;
 }
+
 void Bitmap_All(struct bitmap *Bitmap) {
     // s부터 cnt개 모두 true인지
     int s, cnt;
@@ -398,7 +399,7 @@ void Bitmap_All(struct bitmap *Bitmap) {
 
 /* Finding set or unset bits. */
 void Bitmap_Scan(struct bitmap *Bitmap) {
-    // s부터 cnt가 처음으로 option을 가지는 인덱스 출력
+    // s부터 처음으로 cnt개의 option을 가지는 인덱스 출력
     int s, cnt;
     char option[10];
     scanf("%d %d %s", &s, &cnt, option);
