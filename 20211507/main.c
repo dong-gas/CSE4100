@@ -40,8 +40,8 @@ void Create() {
     // 새로 자료구조 생성하는 함수
     scanf("%s %s", type[structure_cnt], name[structure_cnt]);
     if (!strcmp(type[structure_cnt], "list")) list_init(&List[structure_cnt]);
-    else if(!strcmp(type[structure_cnt], "hashtable")) hash_init(&Hash[structure_cnt], hashing_function, hash_less, NULL);
-    else if(!strcmp(type[structure_cnt], "bitmap")) {
+    else if (!strcmp(type[structure_cnt], "hashtable")) hash_init(&Hash[structure_cnt], hashing_function, hash_less, NULL);
+    else if (!strcmp(type[structure_cnt], "bitmap")) {
         int sz;
         scanf("%d", &sz);
         Bitmap[structure_cnt] = *bitmap_create(sz);
@@ -146,7 +146,6 @@ int main(void) {
             else if (!strcmp(cmd, "hash_empty")) Hash_Empty(&Hash[idx]);
             // ------------- Hash End -------------
 
-
             // ------------- Bitmap Start -------------
             /* Bitmap size. */
             else if (!strcmp(cmd, "bitmap_size")) Bitmap_Size(&Bitmap[idx]);
@@ -170,16 +169,17 @@ int main(void) {
             /* Finding set or unset bits. */
             else if (!strcmp(cmd, "bitmap_scan")) Bitmap_Scan(&Bitmap[idx]);
             else if (!strcmp(cmd, "bitmap_scan_and_flip")) Bitmap_Scan_And_Flip(&Bitmap[idx]);
-            
+
             /* Debugging. */
             else if (!strcmp(cmd, "bitmap_dump")) Bitmap_Dump(&Bitmap[idx]);
 
             /* Other */
-            else if (!strcmp(cmd, "bitmap_expand")) Bitmap[idx] = *Bitmap_Expand(&Bitmap[idx]);
+            else if (!strcmp(cmd, "bitmap_expand")) {
+                struct bitmap* new_bitmap = Bitmap_Expand(&Bitmap[idx]);
+                free(Bitmap[idx].bits);
+                Bitmap[idx] = *new_bitmap;
+            }
             // ------------- Bitmap End -------------
-
-
-            
         }
     }
 }
