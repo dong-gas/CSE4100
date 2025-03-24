@@ -506,6 +506,7 @@ void List_Insert(struct list *List) {
 }
 
 void List_Splice(struct list *List1, struct list *List2, int l, int r, int idx) {
+    // List2의 구간 [l, r)을 List1의 idx 위치에 splice한다
     struct list_elem *I, *L, *R;
     I = list_begin(List1);
     L = list_begin(List2);
