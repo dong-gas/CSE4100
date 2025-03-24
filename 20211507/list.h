@@ -171,41 +171,41 @@ struct list_elem *list_min(struct list *, list_less_func *, void *aux);
 20211507 DongGeon Kim
 */
 
-bool list_less(const struct list_elem* a, const struct list_elem* b, void* aux);
+bool list_less(const struct list_elem*, const struct list_elem*, void*);
 
 /* List Insertion */
-void List_Insert(struct list* List);
-void List_Splice(struct list *List1, struct list *List2, int l, int r, int idx);
-void List_Push_Front(struct list* List);
-void List_Push_Back(struct list* List);
+void List_Insert(struct list* );
+void List_Splice(struct list *, struct list *, int, int, int dx);
+void List_Push_Front(struct list*);
+void List_Push_Back(struct list*);
 
 /* List Removal */
-void List_Remove(struct list* List);
-void List_Pop_Front(struct list* List);
-void List_Pop_Back(struct list* List);
+void List_Remove(struct list*);
+void List_Pop_Front(struct list*);
+void List_Pop_Back(struct list*);
 
 /* List Elements */
-void List_Front(struct list* List);
-void List_Back(struct list* List);
+void List_Front(struct list*);
+void List_Back(struct list*);
 
 /* List Properties */
-void List_Size(struct list* List);
-void List_Empty(struct list* List);
+void List_Size(struct list*);
+void List_Empty(struct list*);
 
 /* Miscellaneous */
-void List_Reverse(struct list* List);
-void List_Sort(struct list* List);
-void List_Insert_Ordered(struct list* List);
-void List_Unique(struct list* List1, struct list* List2);
+void List_Reverse(struct list*);
+void List_Sort(struct list*);
+void List_Insert_Ordered(struct list*);
+void List_Unique(struct list*, struct list*);
 
 /* Max And Min */
-void List_Max(struct list* List);
-void List_Min(struct list* List);
+void List_Max(struct list*);
+void List_Min(struct list*);
 
 /* Others */
-void My_Swap(struct list_elem* elem1, struct list_elem* elem2);
-void List_Swap(struct list* List);
-void List_Shuffle(struct list* List);
-void List_Print(struct list* );
+void My_Swap(struct list_elem*, struct list_elem*);
+void List_Swap(struct list*);
+void List_Shuffle(struct list*);
+void List_Print(struct list*);
 
 #endif /* list.h */
