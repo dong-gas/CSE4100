@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "hex_dump.h"
 #include "limits.h"  // 		#include <limits.h>
