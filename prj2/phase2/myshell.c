@@ -37,7 +37,6 @@ void run_pipe(char** cmds, int i, int cnt) {
         // 마지막 명령어. 재귀 종료
         char* argv[MAXARGS];
         parseline(cmds[i], argv);
-        // fprintf(stderr, "[debug] running command: '%s'\n", argv[0]);
         Execvp(argv[0], argv);
         return;
     }
@@ -87,12 +86,12 @@ void eval(char *cmdline) {
         return;                                    /* Ignore empty lines */
     if (!builtin_command(argv)) {                  // quit -> exit(0), & -> ignore, other -> run
 
-        // buitlin_command(exit, quit, cd)가 아닌 경우                    
+        // buitlin_command(즉, exit, quit, cd)가 아닌 경우                    
         pid = Fork();            
-        if (pid == 0) {  // 자식
+        if (pid == 0) {      // 자식
             if(cnt > 1) run_pipe(cmds, 0, cnt); // 파이프가 있으면 재귀적으로 실행       
             else {
-                for (int k = 0; argv[k] != NULL; k++) fprintf(stderr, "[debug argv[%d]] = %s\n", k, argv[k]); // 디버깅용 출력
+                // for (int k = 0; argv[k] != NULL; k++) fprintf(stderr, "[debug argv[%d]] = %s\n", k, argv[k]); // 디버깅용 출력
                 Execvp(argv[0], argv);         // 단일 명령이라면 그냥 실행
             }
         }
@@ -118,10 +117,8 @@ int builtin_command(char **argv) {
         exit(0);
     if (!strcmp(argv[0], "exit")) /* exit 구현 */
         exit(0);
-    if (!strcmp(argv[0], "cd")) { /* cd 구현 */
-        Cd(argv[1]);
-        return 1;
-    }
+    if (!strcmp(argv[0], "cd"))   /* cd 구현 */
+        return Cd(argv[1]);
     if (!strcmp(argv[0], "&")) /* Ignore singleton & */
         return 1;
 
@@ -132,50 +129,38 @@ int builtin_command(char **argv) {
 /* $begin parseline */
 /* parseline - Parse the command line and build the argv array */
 int parseline(char *buf, char **argv) {
-    char *delim; /* Points to first space delimiter */
-    int argc;    /* Number of args */
-    int bg;      /* Background job? */
+    int argc = 0, bg = 0;
+    if (buf[strlen(buf) - 1] == '\n') buf[strlen(buf) - 1] = '\0';
 
-    if (buf[strlen(buf)-1] == '\n') buf[strlen(buf) - 1] = ' '; // 맨 마지막이 엔터면 공백으로 바꾸고
-    else buf[strlen(buf)] = ' ';                                // 그게 아니면 그 다음 칸을 공백으로
+    char* ptr = buf;
+    while (*ptr) {
+        while (isspace(*ptr)) ptr++; // 앞 빈칸 생략
+        if (*ptr == '\0') break;
 
-
-    // buf[strlen(buf) - 1] = ' ';   /* Replace trailing '\n' with space */
-    while (*buf && (*buf == ' ')) /* Ignore leading spaces */
-        buf++;
-
-    /* Build the argv list */
-    argc = 0;
-    while ((delim = strchr(buf, ' '))) {
-        argv[argc++] = buf;
-        *delim = '\0';
-        buf = delim + 1;
-        while (*buf && (*buf == ' ')) /* Ignore spaces */
-            buf++;
+        if (*ptr == '"' || *ptr == '\'') {
+            char q = *ptr;
+            argv[argc++] = ++ptr;
+            while (*ptr && *ptr != q) ptr++; // 닫는 괄호 전까지
+            if (*ptr) *ptr++ = '\0';
+        }
+        else {
+            argv[argc++] = ptr;
+            while (*ptr && !isspace(*ptr)) ptr++; // 공백 전까지
+            if (*ptr) *ptr++ = '\0';
+        }
     }
+
+    // 하단은 기존 코드 그대로..
+
     argv[argc] = NULL;
-
-    if (argc == 0) /* Ignore blank line */
-        return 1;
-
-    for (int i = 0; i < argc; i++) argv[i] = delete_quotes(argv[i]); // 파싱할 때 제일 바깥쪽 따옴표 제거하기
-
-
-    /* Should the job run in the background? */
+    
+    if (argc == 0) return 1;
+    
     if ((bg = (*argv[argc - 1] == '&')) != 0)
         argv[--argc] = NULL;
-
-
     return bg;
 }
 /* $end parseline */
-
-char* delete_quotes(char* s) {
-    int len = strlen(s);
-    if (len < 2) return s;
-    if ((s[0] == '\'' && s[len - 1] == '\'') || (s[0] == '"' && s[len - 1] == '"')) s[len - 1] = '\0', s++;
-    return s;
-}
 
 void directory_error(char *path) {
     // 디렉토리가 없을 때 오류 출력
@@ -183,7 +168,7 @@ void directory_error(char *path) {
     return;
 }
 
-void Cd(char *path) {
+int Cd(char *path) {
     char *home = getenv("HOME");  // 환경변수 HOME 찾기
 
     if (path == NULL || strlen(path) == 0 || strcmp(path, "~") == 0) {
@@ -193,7 +178,7 @@ void Cd(char *path) {
     else if (path[0] == '~') {
         if (home == NULL) {  // 만약 HOME이 등록되어 있지 않으면 오류
             directory_error(path);
-            return;
+            return 1;
         }
 
         char target_path[MAXLINE];
@@ -204,6 +189,7 @@ void Cd(char *path) {
     else {                                             // 일반 경로
         if (chdir(path) == -1) directory_error(path);  // 경로 없는 경우
     }
+    return 1;
 }
 
 void Execvp(const char *filename, char *const argv[]) {
@@ -231,6 +217,5 @@ int parseline_by_pipe(char* buf, char ** cmds) {
         cmd = strtok(NULL, "|");
     }
     cmds[cnt] = NULL;
-
     return cnt;
 }
