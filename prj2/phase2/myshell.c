@@ -59,7 +59,6 @@ void run_pipe(char** cmds, int i, int cnt) {
         run_pipe(cmds, i + 1, cnt);
         int status;
         Waitpid(pid, &status, 0);
-
     }
 }
 /* $end run pipe */
@@ -85,16 +84,11 @@ void eval(char *cmdline) {
     if (argv[0] == NULL)
         return;                                    /* Ignore empty lines */
     if (!builtin_command(argv)) {                  // quit -> exit(0), & -> ignore, other -> run
-
         // buitlin_command(즉, exit, quit, cd)가 아닌 경우                    
+
+
         pid = Fork();            
-        if (pid == 0) {      // 자식
-            if(cnt > 1) run_pipe(cmds, 0, cnt); // 파이프가 있으면 재귀적으로 실행       
-            else {
-                // for (int k = 0; argv[k] != NULL; k++) fprintf(stderr, "[debug argv[%d]] = %s\n", k, argv[k]); // 디버깅용 출력
-                Execvp(argv[0], argv);         // 단일 명령이라면 그냥 실행
-            }
-        }
+        if (pid == 0) run_pipe(cmds, 0, cnt); // 자식
         else if (pid > 0) {  // 부모
             int status;
             Waitpid(pid, &status, 0);
