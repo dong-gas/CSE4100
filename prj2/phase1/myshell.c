@@ -1,13 +1,17 @@
 /* $begin shellmain */
+
+
 #include <errno.h>
 
 #include "csapp.h"
+#include "myshell.h" /* 추가 */
 #define MAXARGS 128
 
 /* Function prototypes */
 void eval(char *cmdline);
 int parseline(char *buf, char **argv);
 int builtin_command(char **argv);
+
 
 int main() {
     char cmdline[MAXLINE]; /* Command line */
@@ -38,9 +42,16 @@ void eval(char *cmdline) {
     if (argv[0] == NULL)
         return;                                    /* Ignore empty lines */
     if (!builtin_command(argv)) {                  // quit -> exit(0), & -> ignore, other -> run
-        if (execve(argv[0], argv, environ) < 0) {  // ex) /bin/ls ls -al &
-            printf("%s: Command not found.\n", argv[0]);
-            exit(0);
+
+        // buitlin_command가 아닌 경우
+        pid = Fork();        
+        
+        if (pid == 0) {  // 자식
+            Execvp(argv[0], argv);
+        }
+        else if (pid > 0) {  // 부모
+            int status;
+            Waitpid(pid, &status, 0);
         }
 
         /* Parent waits for foreground job to terminate */
@@ -59,9 +70,13 @@ int builtin_command(char **argv) {
         exit(0);
     if (!strcmp(argv[0], "exit")) /* exit 구현 */
         exit(0);
-
+    if (!strcmp(argv[0], "cd")) { /* cd 구현 */
+        Cd(argv[1]);
+        return 1;
+    }
     if (!strcmp(argv[0], "&")) /* Ignore singleton & */
         return 1;
+
     return 0; /* Not a builtin command */
 }
 /* $end eval */
@@ -98,3 +113,38 @@ int parseline(char *buf, char **argv) {
     return bg;
 }
 /* $end parseline */
+
+void directory_error(char *path) {
+    // 디렉토리가 없을 때 오류 출력
+    printf("bash: cd: %s: No such file or directory\n", path);
+    return;
+}
+
+void Cd(char *path) {
+    char *home = getenv("HOME");  // 환경변수 HOME 찾기
+
+    if (path == NULL || strlen(path) == 0 || strcmp(path, "~") == 0) {
+        // Home directory로 이동하는 경우들
+        if (home == NULL || chdir(home) == -1) directory_error(path);  // 만약 HOME이 등록되어 있지 않거나 이동 실패한 경우 오류출력
+    }
+    else if (path[0] == '~') {
+        if (home == NULL) {  // 만약 HOME이 등록되어 있지 않으면 오류
+            directory_error(path);
+            return;
+        }
+
+        char target_path[MAXLINE];
+        snprintf(target_path, sizeof(target_path), "%s%s", home, path + 1);
+
+        if (chdir(target_path) == -1) directory_error(path);  // 경로 없는 경우
+    }
+    else {                                             // 일반 경로
+        if (chdir(path) == -1) directory_error(path);  // 경로 없는 경우
+    }
+}
+
+void Execvp(const char *filename, char *const argv[]) {
+    // 경로가 주어지지 않았을 때도 사용 할 수 있는 execvp를 사용
+    if (execvp(filename, argv) < 0)
+        unix_error("Execvp error");
+}
