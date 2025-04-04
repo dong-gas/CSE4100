@@ -12,13 +12,23 @@ void eval(char *cmdline);
 int parseline(char *buf, char **argv);
 int builtin_command(char **argv);
 
+job job_list[MAXJOBS];
+int jid = 0;
+
 int main() {
+    /* signal handler 등록 */
+    Signal(SIGCHLD, sigchld_handler);
+    Signal(SIGINT, sigint_handler);
+    Signal(SIGTSTP, sigtstp_handler);
+
     char cmdline[MAXLINE]; /* Command line */
+    init_job();            // init joblist
 
     while (1) {
         /* Read */
         printf("CSE4100-SP-P2> ");
         fgets(cmdline, MAXLINE, stdin);
+        // cmdline[strcspn(cmdline, "\n")] = '\0';
         if (feof(stdin))
             exit(0);
 
@@ -30,7 +40,7 @@ int main() {
 
 /* $begin run pipe */
 /* 재귀적으로 pipe를 실행 */
-void run_pipe(char **cmds, int i, int cnt) {
+void run_pipe(char **cmds, int i, int cnt, int bg) {
     // fprintf(stderr, "[debug] running command: '%s'\n", cmds[i]);
     if (i + 1 == cnt) {
         // 마지막 명령어. 재귀 종료
@@ -51,13 +61,11 @@ void run_pipe(char **cmds, int i, int cnt) {
         parseline(cmds[i], argv);
         Execvp(argv[0], argv);
     }
-    else if (pid > 0) {              // 부모
-        Dup2(fd[0], STDIN_FILENO);   // 파이프로 넘기기
-        Close(fd[0]), Close(fd[1]);  // 닫기
-        run_pipe(cmds, i + 1, cnt);
-        int status;
-        Waitpid(pid, &status, 0);
-    }
+
+    Close(fd[1]);
+    Dup2(fd[0], STDIN_FILENO);   // 파이프로 넘기기
+    Close(fd[0]);  // 닫기
+    run_pipe(cmds, i + 1, cnt, bg);
 }
 /* $end run pipe */
 
@@ -84,23 +92,24 @@ void eval(char *cmdline) {
         // buitlin_command(즉, exit, quit, cd)가 아닌 경우
 
         pid = Fork();
-        if (pid == 0) run_pipe(cmds, 0, cnt);  // 자식
-        else if (pid > 0) {                    // 부모
+        if (pid == 0) run_pipe(cmds, 0, cnt, bg);  // 자식
+        else if (pid > 0) {                        // 부모
             if (!bg) {
                 int status;
                 Waitpid(pid, &status, 0);
             }
             else {
-                printf("[%d] %d\n", 1, pid);
+                // printf("[%d] %d\n", 1, pid);
+                add_job(pid, 1, cmdline);
             }
         }
 
-        /* Parent waits for foreground job to terminate */
-        if (!bg) {ㅇㅋ
-            int status;
-        }
-        else  // when there is backgrount process!
-            printf("%d %s", pid, cmdline);
+        // /* Parent waits for foreground job to terminate */
+        // if (!bg) {
+        //     int status;
+        // }
+        // else  // when there is backgrount process!
+        //     printf("%d %s", pid, cmdline);
     }
     return;
 }
@@ -115,7 +124,8 @@ int builtin_command(char **argv) {
         return Cd(argv[1]);
     if (!strcmp(argv[0], "&")) /* Ignore singleton & */
         return 1;
-
+    if (!strcmp(argv[0], "jobs"))
+        return Jobs();
     return 0; /* Not a builtin command */
 }
 /* $end eval */
@@ -191,6 +201,14 @@ int Cd(char *path) {
     return 1;
 }
 
+int Jobs() {
+    for (int i = 0; i < MAXJOBS; i++) {
+        if (!job_list[i].pid) continue;
+        printf("[%d] %s %s", job_list[i].job_id, job_list[i].state ? "Running" : "Stopped", job_list[i].cmd);
+    }
+    return 1;
+}
+
 void Execvp(const char *filename, char *const argv[]) {
     // 경로가 주어지지 않았을 때도 사용 할 수 있는 execvp를 사용
     if (execvp(filename, argv) < 0)
@@ -217,4 +235,53 @@ int parseline_by_pipe(char *buf, char **cmds) {
     }
     cmds[cnt] = NULL;
     return cnt;
+}
+
+void init_job() {
+    memset(job_list, 0, sizeof(job_list));
+}
+
+void add_job(pid_t pid, int state, char *cmdline) {
+    for (int i = 0; i < MAXJOBS; i++) {
+        if (job_list[i].pid) continue;
+        job_list[i].pid = pid;
+        job_list[i].job_id = ++jid;
+        job_list[i].state = state;
+        strcpy(job_list[i].cmd, cmdline);
+        return;
+    }
+}
+
+void sigchld_handler(int sig) {  // 자식 프로세스 종료 감지
+    int bef = errno, status;
+    pid_t pid;
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+        for (int i = 0; i < MAXJOBS; i++) {
+            if (job_list[i].pid != pid) continue;
+            job_list[i].pid = job_list[i].job_id = job_list[i].state = 0;
+            job_list[i].cmd[0] = '\0';
+            break;
+        }
+    }
+    errno = bef;
+    return;
+}
+
+void sigint_handler(int sig) {  // ctrl + c : 종료
+    for (int i = 0; i < MAXJOBS; i++) {
+        if (!job_list[i].pid || !job_list[i].state) continue;
+        Kill(-job_list[i].pid, SIGINT);
+        break;
+    }
+    return;
+}
+
+void sigtstp_handler(int sig) {  // ctrl + z : 중지
+    for (int i = 0; i < MAXJOBS; i++) {
+        if (!job_list[i].pid || !job_list[i].state) continue;
+        Kill(-job_list[i].pid, SIGTSTP);
+        job_list[i].state = 0;
+        break;
+    }
+    return;
 }
