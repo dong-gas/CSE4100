@@ -1,15 +1,3 @@
-[system programming lecture]
-
--project 2 baseline
-
-csapp.{c,h}
-        CS:APP3e functions
-
-myshell.c
-        Simple shell example
-
-
-
 myshell.c myshell.h csapp.c csapp.h Makefile이 필요합니다.
 
 터미널에서 make 입력 후, ./myshell을 입력하면 myshell이 실행됩니다.

@@ -85,7 +85,7 @@ void eval(char *cmdline) {
         }
     }
 
-    // 부모: 사용 다한 파이프 fd 닫기
+    // 부모) 사용 다한 파이프 fd 닫기
     for (int k = 0; k < 2 * (cmd_count - 1); k++) Close(pipefds[k]);
 
     setpgid(pids[0], pids[0]);

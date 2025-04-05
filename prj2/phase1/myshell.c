@@ -77,7 +77,10 @@ int builtin_command(char **argv) {
     if (!strcmp(argv[0], "&")) /* Ignore singleton & */
         return 1;
 
-    return 0; /* Not a builtin command */
+    return 0; /* Not a builtin c-	Phase2 (pipelining)
+    	Pipeline( ‘|’ )을 구현한 부분에 대해서 간략히 설명 (design & implementation)
+    	Pipeline 개수에 따라 어떻게 handling했는지에 대한 설명
+    ommand */
 }
 /* $end eval */
 

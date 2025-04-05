@@ -1,15 +1,11 @@
-[system programming lecture]
+myshell.c myshell.h csapp.c csapp.h Makefile이 필요합니다.
 
--project 2 baseline
+20211507 김동건
 
-csapp.{c,h}
-        CS:APP3e functions
+phase3...
 
-shellex.c
-        Simple shell example
+기존 기본 명령어들과 pipe에 아래 내용을 추가 구현하여 완성
+백그라운드와 Job 기능을 구현
+시그널 처리도 구현
 
-myshell.c
-myshell.h
-csapp.c
-csapp.h
-Makefile
+make 후, ./myshell을 통해 실행 가능

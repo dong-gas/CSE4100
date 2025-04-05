@@ -211,7 +211,7 @@ static void sio_reverse(char s[]) {
 static void sio_ltoa(long v, char s[], int b) {
     int c, i = 0;
 
-    do {
+    do {q
         s[i++] = ((c = (v % b)) < 10) ? c + '0' : c - 10 + 'a';
     } while ((v /= b) > 0);
     s[i] = '\0';

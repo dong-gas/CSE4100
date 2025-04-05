@@ -12,7 +12,6 @@ typedef enum {
     ST
 } job_state;
 
-/* 하나의 Job 정보를 담는 구조체 */
 typedef struct {
     pid_t pid;  // pid..
     pid_t pgid; // pgid (그룹)
