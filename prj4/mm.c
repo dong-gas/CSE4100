@@ -82,7 +82,7 @@ static int get_index(size_t size);
 static char **segregated_free_list;  // 다중 free list 관리용 포인터
 int prev_size;                       // realloc 전 사이즈 저장용. 메모리 realloc 할 때마다
 
-// free 표시 하는 거. size만큼
+// free, alloc 표시 하는 거. size만큼
 static void mark_block(char **ptr, size_t size, int alloc) { PUT(ptr, PACK(size, alloc)), PUT(ptr + size + 1, PACK(size, alloc)); }
 
 /*
@@ -174,7 +174,7 @@ void mm_free(void *ptr) {
     size_t pay_load = GET_SIZE(ptr);  // 페이로드 크기 (헤더, 푸터 뺀 거)
     mark_block(ptr, pay_load, 0);
 
-    // 합친 다음에 segmented에 free 노드추가
+    // 합친 다음에 segregated free list에 free 노드추가
     insert_node(merge(ptr));
 }
 
